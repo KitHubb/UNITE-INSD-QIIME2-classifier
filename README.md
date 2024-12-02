@@ -1,6 +1,10 @@
 # UNITE-INSD-QIIME2-classifier
 This repository provides a step-by-step guide for creating a QIIME2-compatible classifier using the UNITE+INSD dataset for fungal ITS taxonomy.
 
+## Prerequisites
+- Conda enviroment
+- QIIME2 
+
 ## Resource
 - datasets: `UNiTE+INSD` 
 - version: `10.0`
@@ -10,24 +14,35 @@ This repository provides a step-by-step guide for creating a QIIME2-compatible c
 
 
 ## Preprocessing 
-### Step 1. Extract headers from the UNITE fasta file
+### Step 1. Download UNITE+INSD fasta
+- link: https://doi.plutof.ut.ee/doi/10.15156/BIO/2959330
+- Download `UNITE_public_21.04.2024.fasta.gz` file
+
+```
+cd /your_path/Reference/UNITE_INDS_ver10
+gzip -d UNITE_public_21.04.2024.fasta.gz
+```
+
+### Step 2. Extract headers from the UNITE fasta file
 Extract all the taxonomy headers from the dataset using the following command:
 ```
 grep ">" UNITE_public_21.04.2024.fasta > \
 UNITE_public_taxonomy_21.04.2024.txt
-
 ```
 
-### Step 2. Reformat to QIIME-compatible format
+### Step 3. Reformat to QIIME-compatible format
 Extract `kingdom, phylum, class, order, family, genus, species` taxonomy levels and reformat the file:
 Use this command to convert the taxonomy data into QIIME-compatible format:
 ```
+# https://forum.qiime2.org/t/converting-a-usearch-unite-its-database-to-qiime-2-format/18915
+# code by colinbrislawn
+
 cat UNITE_public_21.04.2024.fasta | grep '^>' | \
   sed 's/>//; s/|.*=/\t/; s/:/__/g; s/,/; /g; s/;$//' | \
   sed 's/\(.__\).__[^;]*/\1/g' > \
   UNITE_public_taxonomy_modi_21.04.2024.txt
 ```
-### Step 3. Split taxonomy into Feature ID and Taxon columns
+### Step 4. Split taxonomy into Feature ID and Taxon columns
 1. Create a shell script (process_taxonomy.sh) with the following content:
  ```
    #!/bin/bash
@@ -51,7 +66,11 @@ echo "File successfully created: $output_file"
 chmod +x process_taxonomy.sh
 ./process_taxonomy.sh
 ```
-### Step 4. Import data into QIIME2
+### Step 5. Import data into QIIME2
+```
+conda activate qiime2-amplicon-20242.2
+```
+
 1. Import the taxonomy file:
 ```
 qiime tools import --type 'FeatureData[Taxonomy]'   \
@@ -66,7 +85,7 @@ qiime tools import --type 'FeatureData[Sequence]' \
 --output-path UNITE_public_21.04.2024.qza
 ```
 
-### Step 5. Train the QIIME2 classifier (>6h)
+### Step 6. Train the QIIME2 classifier (>6h)
 Train the classifier using the imported data:
 
 ```
