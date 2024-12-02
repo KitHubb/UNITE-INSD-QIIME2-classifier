@@ -66,7 +66,7 @@ qiime tools import --type 'FeatureData[Sequence]' \
 --output-path UNITE_public_21.04.2024.qza
 ```
 
-### Step 5. Train the QIIME2 classifier (6h>)
+### Step 5. Train the QIIME2 classifier (>6h)
 Train the classifier using the imported data:
 
 ```
